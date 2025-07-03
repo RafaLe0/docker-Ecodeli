@@ -1,0 +1,85 @@
+services:
+  mysql:
+    image: mariadb:10.5
+    container_name: ecodeli-mariadb
+    secrets: 
+      - mysql_user
+      - mysql_password
+      - mysql_database
+      - mysql_host
+    entrypoint: ["/bin/bash", "/docker-entrypoint-initdb-env.sh"]
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./01-init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./init-mariadb-entrypoint.sh:/docker-entrypoint-initdb-env.sh
+    networks:
+      - ecodeli-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 30s
+
+  api:
+    image: rafal3o/ecodeli-api:v1.0
+    container_name: ecodeli-api
+    env_file:
+      - .env
+    volumes:
+      - ./init_ecodeli_script.sh:/usr/local/bin/init-secrets.sh
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      ecodeli-network:
+        aliases:
+          - api.ecodeli.fr
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/getServices.php"]
+      timeout: 30s
+      retries: 5
+      interval: 10s
+      start_period: 60s
+    entrypoint: ["/bin/bash", "-c"]
+    command: |
+      "
+      chmod +x /usr/local/bin/init-secrets.sh
+      /usr/local/bin/init-secrets.sh
+      apache2-foreground
+      "
+
+  src:
+    image: rafal3o/ecodeli-front:v1.0
+    container_name: ecodeli-src
+    volumes:
+      - ./custom-php.ini:/usr/local/etc/php/conf.d/custom-php.ini
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "80:80"
+    networks:
+      - ecodeli-network
+
+networks:
+  ecodeli-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+secrets:
+  mysql_user:
+    file: ./secrets/mysql_user.secret
+  mysql_password:
+    file: ./secrets/mysql_password.secret
+  mysql_database:
+    file: ./secrets/mysql_database.secret
+  mysql_host:
+    file: ./secrets/mysql_host.secret
+  jwt_secret:
+    file: ./secrets/jwt_secret.secret
+  stripe_api:
+    file: ./secrets/stripe_api.secret
+
