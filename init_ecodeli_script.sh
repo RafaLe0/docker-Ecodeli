@@ -31,7 +31,9 @@ JWT_SECRET=$(az keyvault secret show --name JwtSecretKey --vault-name kv-Ecodeli
 STRIPE_API=$(az keyvault secret show --name StripeApiKey --vault-name kv-Ecodeli-Production-01 --query value -o tsv)
 
 echo "Stockage des secrets dans des variables d'environnement..."
+echo "DB_HOST original: '$DB_HOST'"
 DB_HOST=${DB_HOST//localhost/mysql}
+echo "DB_HOST après substitution: '$DB_HOST'"
 echo "Stockage local des secrets..."
 
 SECRETS_DIR="./secrets"
