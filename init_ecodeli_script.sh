@@ -3,7 +3,7 @@
 echo "Initialisation du back-end Ecodeli en cours..."
 echo "Installation d'az login pour la communication des secrets..."
 
-curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
 echo "Authentification Azure..."
 set -o allexport
@@ -46,7 +46,7 @@ echo "$DB_HOST"       > "$SECRETS_DIR/mysql_host.secret"
 echo "$JWT_SECRET"    > "$SECRETS_DIR/jwt_secret.secret"
 echo "$STRIPE_API"    > "$SECRETS_DIR/stripe_api.secret"
 
-chmod a+rw "$SECRETS_DIR"/*.secret
+sudo chmod a+rw "$SECRETS_DIR"/*.secret
 
 # Fichier groupé .env
 cat <<EOF > "$SECRETS_DIR/db.env"
@@ -58,7 +58,7 @@ JWT_SECRET=$JWT_SECRET
 STRIPE_API=$STRIPE_API
 EOF
 
-chmod a+rw "$SECRETS_DIR/db.env"
+sudo chmod a+rw "$SECRETS_DIR/db.env"
 
 echo "Fichiers secrets générés."
 
