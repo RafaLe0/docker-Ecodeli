@@ -22,7 +22,7 @@ services:
       start_period: 30s
 
   api:
-    image: rafal3o/ecodeli-api:v3
+    image: rafal3o/ecodeli-api:v1.1
     container_name: ecodeli-api
     env_file:
       - .env
@@ -51,7 +51,7 @@ services:
       "
 
   src:
-    image: rafal3o/ecodeli-front:v3
+    image: rafal3o/ecodeli-front:v1.1
     container_name: ecodeli-src
     volumes:
       - ./custom-php.ini:/usr/local/etc/php/conf.d/custom-php.ini
